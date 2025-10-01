@@ -78,7 +78,6 @@ def setup_database(force_reindex: bool = False) -> str:
     
     return db_path
 
-import os
 
 def start_server(host: str = "0.0.0.0", port: int = None, reload: bool = False):
     """Start the FastAPI server."""
@@ -107,7 +106,6 @@ def start_server(host: str = "0.0.0.0", port: int = None, reload: bool = False):
     )
 
 
-
 def main():
     """Main entry point with command line arguments."""
     sys.stdout.reconfigure(encoding='utf-8')
@@ -124,16 +122,18 @@ Examples:
         """
     )
     
+    # ✅ غيّرنا القيمة الافتراضية من 127.0.0.1 إلى 0.0.0.0
     parser.add_argument(
         "--host", 
-        default="127.0.0.1", 
-        help="Host to bind to (default: 127.0.0.1)"
+        default="0.0.0.0", 
+        help="Host to bind to (default: 0.0.0.0)"
     )
+    # ✅ خذ المنفذ من البيئة أولاً ثم الافتراضي 8000
     parser.add_argument(
         "--port", 
         type=int, 
-        default=8000, 
-        help="Port to bind to (default: 8000)"
+        default=int(os.environ.get("PORT", 8000)), 
+        help="Port to bind to (default: 8000 or from env)"
     )
     parser.add_argument(
         "--reindex", 
@@ -179,4 +179,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    main() 
+    main()
