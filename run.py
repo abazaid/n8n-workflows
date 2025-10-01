@@ -78,29 +78,34 @@ def setup_database(force_reindex: bool = False) -> str:
     
     return db_path
 
+import os
 
-def start_server(host: str = "127.0.0.1", port: int = 8000, reload: bool = False):
+def start_server(host: str = "0.0.0.0", port: int = None, reload: bool = False):
     """Start the FastAPI server."""
+    # ✅ استخدم المنفذ من بيئة Render أو المنفذ الافتراضي 8000
+    port = port or int(os.environ.get("PORT", 8000))
+
     print(f"🌐 Starting server at http://{host}:{port}")
     print(f"📊 API Documentation: http://{host}:{port}/docs")
     print(f"🔍 Workflow Search: http://{host}:{port}/api/workflows")
     print()
     print("Press Ctrl+C to stop the server")
     print("-" * 50)
-    
+
     # Configure database path
     os.environ['WORKFLOW_DB_PATH'] = "database/workflows.db"
-    
+
     # Start uvicorn with better configuration
     import uvicorn
     uvicorn.run(
-        "api_server:app", 
-        host=host, 
-        port=port, 
+        "api_server:app",
+        host=host,
+        port=port,
         reload=reload,
         log_level="info",
         access_log=False  # Reduce log noise
     )
+
 
 
 def main():
