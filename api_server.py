@@ -18,15 +18,17 @@ from pathlib import Path
 import uvicorn
 
 from workflow_db import WorkflowDatabase
-from sitemap_generator import router as sitemap_router
-app.include_router(sitemap_router)
+from sitemap_generator import router as sitemap_router  # ✅ استيراد الراوتر بعد المكتبات
 
-# Initialize FastAPI app
+# ✅ أنشئ تطبيق FastAPI أولاً
 app = FastAPI(
     title="N8N Workflow Documentation API",
     description="Fast API for browsing and searching workflow documentation",
     version="2.0.0"
 )
+
+# ✅ بعد إنشاء app، اربطه مع راوتر السايت ماب
+app.include_router(sitemap_router)
 
 # Add middleware for performance
 app.add_middleware(GZipMiddleware, minimum_size=1000)
