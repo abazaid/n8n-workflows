@@ -27,22 +27,44 @@ async def sitemap():
     # ✅ 2. صفحة البحث العامة
     add_url(f"{base_url}/api/workflows", changefreq="weekly", priority="0.8")
 
-    # ✅ 3. روابط جميع الـ Workflows من قاعدة البيانات
-    try:
-        workflows, total = db.search_workflows(limit=5000, offset=0)
-        for wf in workflows:
-            filename = wf.get("filename")
-            name = wf.get("name", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            if filename:
-                url = SubElement(urlset, "url")
-                SubElement(url, "loc").text = f"{base_url}/api/workflows/{filename}"
-                SubElement(url, "changefreq").text = "monthly"
-                SubElement(url, "priority").text = "0.6"
-                # ✅ أضف اسم الـ Workflow لسهولة القراءة والفهرسة
-                if name:
-                    SubElement(url, "name").text = name
-    except Exception as e:
-        print(f"⚠️ خطأ أثناء جلب الـ workflows: {e}")
+# ✅ 3. روابط جميع الـ Workflows من قاعدة البيانات
+try:
+    workflows, total = db.search_workflows(limit=5000, offset=0)
+    for wf in workflows:
+        filename = wf.get("filename")
+        name = wf.get("name", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        updated_at = wf.get("updated_at") or wf.get("created_at")
+
+        if filename:
+            url = SubElement(urlset, "url")
+
+            # 🔹 رابط الصفحة
+            SubElement(url, "loc").text = f"{base_url}/api/workflows/{filename}"
+
+            # 🔹 آخر تحديث بصيغة Google المعيارية (YYYY-MM-DD)
+            if updated_at:
+                try:
+                    # لو التاريخ محفوظ كنص نحاول نحوله
+                    date_str = str(updated_at).split(" ")[0]
+                except:
+                    date_str = datetime.utcnow().strftime("%Y-%m-%d")
+            else:
+                date_str = datetime.utcnow().strftime("%Y-%m-%d")
+
+            SubElement(url, "lastmod").text = date_str
+
+            # 🔹 تكرار التحديث
+            SubElement(url, "changefreq").text = "monthly"
+
+            # 🔹 أولوية متوسطة
+            SubElement(url, "priority").text = "0.6"
+
+            # 🔹 أضف الاسم كتـعليق (ليس عنصر) لتحسين القابلية للقراءة
+            if name:
+                url.append(Comment(f" Workflow Name: {name} "))
+
+except Exception as e:
+    print(f"⚠️ خطأ أثناء جلب الـ workflows: {e}")
 
     # ✅ 4. روابط جميع التصنيفات (Categories) تلقائيًا
     categories_file = Path("context/unique_categories.json")
