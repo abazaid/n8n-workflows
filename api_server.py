@@ -18,6 +18,8 @@ from pathlib import Path
 import uvicorn
 
 from workflow_db import WorkflowDatabase
+from sitemap_generator import router as sitemap_router
+app.include_router(sitemap_router)
 
 # Initialize FastAPI app
 app = FastAPI(
