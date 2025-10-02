@@ -506,6 +506,22 @@ async def global_exception_handler(request, exc):
         content={"detail": f"Internal server error: {str(exc)}"}
     )
 
+# Serve SEO files (robots.txt, sitemap.xml) from /static folder
+@app.get("/robots.txt", include_in_schema=False)
+async def robots_txt():
+    file_path = Path("static") / "robots.txt"
+    if file_path.exists():
+        return FileResponse(file_path)
+    raise HTTPException(status_code=404, detail="robots.txt not found")
+
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap_xml():
+    file_path = Path("static") / "sitemap.xml"
+    if file_path.exists():
+        return FileResponse(file_path)
+    raise HTTPException(status_code=404, detail="sitemap.xml not found")
+
+
 # Mount static files AFTER all routes are defined
 static_dir = Path("static")
 if static_dir.exists():
