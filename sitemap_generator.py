@@ -32,8 +32,15 @@ async def sitemap():
         workflows, total = db.search_workflows(limit=5000, offset=0)
         for wf in workflows:
             filename = wf.get("filename")
+            name = wf.get("name", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
             if filename:
-                add_url(f"{base_url}/api/workflows/{filename}", changefreq="monthly", priority="0.6")
+                url = SubElement(urlset, "url")
+                SubElement(url, "loc").text = f"{base_url}/api/workflows/{filename}"
+                SubElement(url, "changefreq").text = "monthly"
+                SubElement(url, "priority").text = "0.6"
+                # ✅ أضف اسم الـ Workflow لسهولة القراءة والفهرسة
+                if name:
+                    SubElement(url, "name").text = name
     except Exception as e:
         print(f"⚠️ خطأ أثناء جلب الـ workflows: {e}")
 
